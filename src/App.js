@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from './services/api';
 
 import './App.css';
 import winterBackground from './assets/winter.png';
@@ -6,10 +7,23 @@ import winterBackground from './assets/winter.png';
 import Header from './components/Header';
 
 export default function App() {
-  const [movies, setMovies] = useState(['The Lord of the Rings', 'Harry Potter', 'Titanic']);
+  const [movies, setMovies] = useState([]);
 
-  function handleAddMovie() {
-    setMovies([...movies, `New movie ${Date.now()}`]);
+  useEffect(() => {
+    api.get('/movies').then(response => {
+      setMovies(response.data);
+    });
+  }, []);
+
+  async function handleAddMovie() {
+    const response = await api.post('/movies', {
+      title: `Novo filme - ${Date.now()}`,
+      year: Math.round(Math.ceil)
+    });
+
+    const movie = response.data;
+
+    setMovies([...movies, movie]);
   }
 
   return (
@@ -18,9 +32,13 @@ export default function App() {
 
       <ul>
         {movies.map(movie => (
-          <li key={movie}>
-            <img width="50" height="50" src={winterBackground} alt={movie} />
-            <span>{movie}</span>
+          <li key={movie.id}>
+            <img width="50" height="50" src={winterBackground} alt={movie.title} />
+
+            <div className="content">
+              <span>{movie.title}</span> -
+              <span>{movie.year}</span>
+            </div>
           </li>
         ))}
       </ul>
